@@ -79,37 +79,38 @@ var fuzzySearch = (node, query, maxDistance) => {
 };
 var recurse = (node, query, maxDistance, results, matrix, m, n, prefix) => {
   const offset = m * n;
-  key: for (const key of node.keys()) {
-    if (key === LEAF) {
-      const distance = matrix[offset - 1];
-      if (distance <= maxDistance) {
-        results.set(prefix, [node.get(key), distance]);
-      }
-    } else {
-      let i = m;
-      for (let pos = 0; pos < key.length; ++pos, ++i) {
-        const char = key[pos];
-        const thisRowOffset = n * i;
-        const prevRowOffset = thisRowOffset - n;
-        let minDistance = matrix[thisRowOffset];
-        const jmin = Math.max(0, i - maxDistance - 1);
-        const jmax = Math.min(n - 1, i + maxDistance);
-        for (let j = jmin; j < jmax; ++j) {
-          const different = char !== query[j];
-          const rpl = matrix[prevRowOffset + j] + +different;
-          const del = matrix[prevRowOffset + j + 1] + 1;
-          const ins = matrix[thisRowOffset + j] + 1;
-          const dist = matrix[thisRowOffset + j + 1] = Math.min(rpl, del, ins);
-          if (dist < minDistance)
-            minDistance = dist;
+  key:
+    for (const key of node.keys()) {
+      if (key === LEAF) {
+        const distance = matrix[offset - 1];
+        if (distance <= maxDistance) {
+          results.set(prefix, [node.get(key), distance]);
         }
-        if (minDistance > maxDistance) {
-          continue key;
+      } else {
+        let i = m;
+        for (let pos = 0; pos < key.length; ++pos, ++i) {
+          const char = key[pos];
+          const thisRowOffset = n * i;
+          const prevRowOffset = thisRowOffset - n;
+          let minDistance = matrix[thisRowOffset];
+          const jmin = Math.max(0, i - maxDistance - 1);
+          const jmax = Math.min(n - 1, i + maxDistance);
+          for (let j = jmin; j < jmax; ++j) {
+            const different = char !== query[j];
+            const rpl = matrix[prevRowOffset + j] + +different;
+            const del = matrix[prevRowOffset + j + 1] + 1;
+            const ins = matrix[thisRowOffset + j] + 1;
+            const dist = matrix[thisRowOffset + j + 1] = Math.min(rpl, del, ins);
+            if (dist < minDistance)
+              minDistance = dist;
+          }
+          if (minDistance > maxDistance) {
+            continue key;
+          }
         }
+        recurse(node.get(key), query, maxDistance, results, matrix, i, n, prefix + key);
       }
-      recurse(node.get(key), query, maxDistance, results, matrix, i, n, prefix + key);
     }
-  }
 };
 var SearchableMap = class _SearchableMap {
   /**
@@ -406,31 +407,32 @@ var lookup = (tree, key) => {
 };
 var createPath = (node, key) => {
   const keyLength = key.length;
-  outer: for (let pos = 0; node && pos < keyLength; ) {
-    for (const k of node.keys()) {
-      if (k !== LEAF && key[pos] === k[0]) {
-        const len = Math.min(keyLength - pos, k.length);
-        let offset = 1;
-        while (offset < len && key[pos + offset] === k[offset])
-          ++offset;
-        const child2 = node.get(k);
-        if (offset === k.length) {
-          node = child2;
-        } else {
-          const intermediate = /* @__PURE__ */ new Map();
-          intermediate.set(k.slice(offset), child2);
-          node.set(key.slice(pos, pos + offset), intermediate);
-          node.delete(k);
-          node = intermediate;
+  outer:
+    for (let pos = 0; node && pos < keyLength; ) {
+      for (const k of node.keys()) {
+        if (k !== LEAF && key[pos] === k[0]) {
+          const len = Math.min(keyLength - pos, k.length);
+          let offset = 1;
+          while (offset < len && key[pos + offset] === k[offset])
+            ++offset;
+          const child2 = node.get(k);
+          if (offset === k.length) {
+            node = child2;
+          } else {
+            const intermediate = /* @__PURE__ */ new Map();
+            intermediate.set(k.slice(offset), child2);
+            node.set(key.slice(pos, pos + offset), intermediate);
+            node.delete(k);
+            node = intermediate;
+          }
+          pos += offset;
+          continue outer;
         }
-        pos += offset;
-        continue outer;
       }
+      const child = /* @__PURE__ */ new Map();
+      node.set(key.slice(pos), child);
+      return child;
     }
-    const child = /* @__PURE__ */ new Map();
-    node.set(key.slice(pos), child);
-    return child;
-  }
   return node;
 };
 var remove = (tree, key) => {

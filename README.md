@@ -11,7 +11,7 @@ koa-html-template/
 ├── packages/
 │   ├── core/          # 核心模板引擎
 │   ├── server/        # Koa 服务器应用 + PostgreSQL
-│   ├── client/        # React 客户端组件库
+│   ├── client/        # React 客户端组件库 + Ant Design
 │   ├── shared/        # 共享类型和工具
 │   └── docs/          # 文档和示例
 ├── README.md          # 项目主文档
@@ -43,13 +43,18 @@ koa-html-template/
 - ✅ 数据库连接监控
 
 ### [@koa-html-template/client](./packages/client)
-React 客户端组件库，提供模板渲染组件。
+React 客户端组件库，基于 Ant Design 5，提供完整的模板管理界面。
 
 **特性：**
-- ✅ React Hooks 支持
-- ✅ TypeScript 类型安全
+- ✅ React 18 + TypeScript 支持
+- ✅ Ant Design 5 现代化 UI
+- ✅ 完整的组件库（渲染器、编辑器、列表、表单）
+- ✅ React Hooks 状态管理
+- ✅ 客户端模板预览
+- ✅ 服务端渲染支持
 - ✅ 响应式设计
 - ✅ 组件测试覆盖
+- ✅ Storybook 文档
 
 ### [@koa-html-template/shared](./packages/shared)
 共享类型定义、工具函数和常量。
@@ -117,8 +122,8 @@ npm run dev
 
 # 单独启动服务
 npm run dev:server    # 启动服务器（端口 3000）
-npm run dev:client    # 启动客户端开发服务器
-npm run dev:docs      # 启动文档站点
+npm run dev:client    # 启动客户端开发服务器（端口 3001）
+npm run dev:docs      # 启动文档站点（端口 5173）
 ```
 
 ### 使用核心包
@@ -141,7 +146,7 @@ app.use(koaHtmlTemplate('./templates', {
 app.use(async (ctx: any) => {
   ctx.template('index.html', {
     title: '欢迎使用 Koa HTML Template',
-      users: [
+    users: [
       { name: '张三', age: 25 },
       { name: '李四', age: 30 }
     ]
@@ -149,6 +154,36 @@ app.use(async (ctx: any) => {
 })
 
 app.listen(3000)
+```
+
+### 使用客户端包
+
+```bash
+npm install @koa-html-template/client
+```
+
+```tsx
+import React from 'react'
+import { TemplateRenderer, useTemplateList } from '@koa-html-template/client'
+
+const App = () => {
+  const { templates, loading } = useTemplateList()
+  
+  const template = {
+    id: 1,
+    name: '欢迎页面',
+    content: '<h1>欢迎 {{name}}!</h1>',
+    data: { name: '用户' }
+  }
+
+  return (
+    <TemplateRenderer
+      template={template}
+      data={{ name: '张三' }}
+      onRender={(result) => console.log(result)}
+    />
+  )
+}
 ```
 
 ## 🛠️ 开发指南
@@ -200,6 +235,29 @@ npm run db:migrate      # 📈 运行数据库迁移
 npm run db:reset        # 🔄 重置数据库（删除+创建+迁移）
 ```
 
+### 客户端开发（客户端包）
+
+```bash
+cd packages/client
+
+# 开发服务器
+npm run dev             # 启动开发服务器（端口 3001）
+npm run preview         # 预览构建结果
+
+# 组件文档
+npm run storybook       # 启动 Storybook（端口 6006）
+npm run build-storybook # 构建 Storybook
+
+# 测试
+npm run test            # 运行测试
+npm run test:watch      # 监听模式测试
+npm run test:coverage   # 测试覆盖率
+
+# 代码质量
+npm run lint            # 代码检查
+npm run lint:fix        # 自动修复
+```
+
 ### 开发模式
 
 ```bash
@@ -208,7 +266,7 @@ npm run dev
 
 # 单独启动
 npm run dev:server    # 启动服务器（端口 3000）
-npm run dev:client    # 启动客户端开发服务器
+npm run dev:client    # 启动客户端开发服务器（端口 3001）
 npm run dev:docs      # 启动文档站点（端口 5173）
 ```
 
@@ -274,6 +332,108 @@ npm run dev:docs      # 启动文档站点（端口 5173）
 {# 这是模板注释，不会在输出中显示 #}
 ```
 
+## 🧩 客户端组件
+
+### TemplateRenderer
+
+模板渲染组件，支持客户端预览和服务端渲染。
+
+```tsx
+<TemplateRenderer
+  template={template}
+  data={{ name: '用户名' }}
+  onRender={(result) => console.log(result)}
+  onError={(error) => console.error(error)}
+/>
+```
+
+### TemplateList
+
+模板列表组件，展示和管理模板。
+
+```tsx
+<TemplateList
+  templates={templates}
+  loading={loading}
+  onEdit={(template) => console.log('编辑', template)}
+  onDelete={(id) => console.log('删除', id)}
+  onRender={(template) => console.log('渲染', template)}
+/>
+```
+
+### TemplateEditor
+
+模板编辑器组件，用于创建和编辑模板。
+
+```tsx
+<TemplateEditor
+  template={template}
+  onSave={(template) => console.log('保存', template)}
+  onCancel={() => console.log('取消')}
+  loading={false}
+/>
+```
+
+### TemplateForm
+
+模板表单组件，提供表单输入功能。
+
+```tsx
+<TemplateForm
+  initialValues={{ name: '模板名称' }}
+  onSubmit={(data) => console.log('提交', data)}
+  onCancel={() => console.log('取消')}
+  loading={false}
+/>
+```
+
+## 🪝 客户端 Hooks
+
+### useTemplate
+
+管理单个模板的状态和操作。
+
+```tsx
+const { template, loading, error, fetchTemplate, updateTemplate, deleteTemplate } = useTemplate()
+
+// 获取模板
+await fetchTemplate(1)
+
+// 更新模板
+await updateTemplate(1, { name: '新名称' })
+
+// 删除模板
+await deleteTemplate(1)
+```
+
+### useTemplateList
+
+管理模板列表的状态和操作。
+
+```tsx
+const { templates, loading, error, fetchTemplates, createTemplate } = useTemplateList()
+
+// 获取模板列表
+await fetchTemplates({ limit: 10 })
+
+// 创建模板
+await createTemplate({ name: '新模板', content: '<div>内容</div>' })
+```
+
+### useTemplateRenderer
+
+管理模板渲染的状态和操作。
+
+```tsx
+const { renderResult, rendering, error, renderTemplate, renderByName } = useTemplateRenderer()
+
+// 根据ID渲染
+await renderTemplate(1, { name: '张三' })
+
+// 根据名称渲染
+await renderByName('welcome', { name: '李四' })
+```
+
 ## 📊 API 端点（服务器包）
 
 ### 模板管理
@@ -330,6 +490,7 @@ npm run test
 # 运行特定包的测试
 npm run test --workspace=packages/core
 npm run test --workspace=packages/server
+npm run test --workspace=packages/client
 
 # 监听模式
 npm run test:watch
@@ -344,6 +505,7 @@ npm run test:coverage
 - **API 参考**: [API 文档](./packages/docs/api/)
 - **使用指南**: [指南文档](./packages/docs/guide/)
 - **示例集合**: [示例代码](./packages/docs/examples/)
+- **客户端组件**: [客户端文档](./packages/client/README.md)
 
 ### 本地运行文档
 
@@ -352,6 +514,15 @@ npm run dev:docs
 ```
 
 访问 http://localhost:5173 查看文档。
+
+### Storybook 组件文档
+
+```bash
+cd packages/client
+npm run storybook
+```
+
+访问 http://localhost:6006 查看组件文档。
 
 ## 🚀 部署
 
@@ -404,6 +575,13 @@ TEMPLATE_CACHE=true
 TEMPLATE_DEBUG=false
 ```
 
+客户端包支持以下环境变量：
+
+```env
+# API 基础地址
+VITE_API_URL=http://localhost:3000
+```
+
 ## 📈 性能特性
 
 - **模板缓存**: 自动缓存编译后的模板，显著提升性能
@@ -412,6 +590,8 @@ TEMPLATE_DEBUG=false
 - **类型优化**: TypeScript 类型系统提供编译时优化
 - **数据库连接池**: 高效的数据库连接管理
 - **渲染统计**: 记录模板渲染性能数据
+- **客户端预览**: 支持客户端实时模板预览
+- **响应式设计**: 适配各种屏幕尺寸
 
 ## 🔄 版本管理
 
@@ -436,6 +616,7 @@ npm run release
 - **类型安全**: TypeScript 提供编译时类型检查
 - **输入验证**: 严格的输入验证和错误处理
 - **密码安全**: 支持安全的密码设置和存储
+- **CORS 配置**: 可配置的跨域资源共享
 
 ## 🤝 贡献指南
 
@@ -487,7 +668,7 @@ npm run db:reset
 ```
 
 **构建失败**
-   ```bash
+```bash
 # 清理依赖
 npm run clean:all
 
@@ -503,6 +684,21 @@ npm run build
 # 修改端口
 export PORT=3001
 npm run dev:server
+```
+
+**客户端依赖问题**
+```bash
+cd packages/client
+npm install
+npm run dev
+```
+
+**Vite 插件错误**
+```bash
+# 重新安装客户端依赖
+cd packages/client
+rm -rf node_modules
+npm install
 ```
 
 ### 获取帮助

@@ -113,3 +113,16 @@ dist
 
 # macOS
 .DS_Store
+
+
+# 忽略所有 .vitepress
+.vitepress
+
+.rollup.cache
+
+*.cache
+
+*.lock
+
+*.lockb
+
