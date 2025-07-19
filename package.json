@@ -1,0 +1,37 @@
+{
+  "name": "koa-html-template",
+  "version": "2.0.0",
+  "description": "This is a koa-based templating engine that can render html files for data rendering.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "root-path-plugin": "^1.0.0",
+    "koa": "^2.14.2"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.12",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dingxihu/koa-html-template.git"
+  },
+  "keywords": [
+    "koa-html-template",
+    "koa-html",
+    "typescript",
+    "template-engine"
+  ],
+  "author": "Jericho",
+  "license": "ISC",
+  "homepage": "https://github.com/dingxihu/koa-html-template#readme"
+}
