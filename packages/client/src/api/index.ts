@@ -21,7 +21,7 @@ export class TemplateApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -32,11 +32,11 @@ export class TemplateApiClient {
     try {
       const response = await fetch(url, { ...defaultOptions, ...options });
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || data.message || 'Request failed');
       }
-      
+
       return data;
     } catch (error) {
       throw error instanceof Error ? error : new Error('Unknown error');
@@ -46,14 +46,14 @@ export class TemplateApiClient {
   // 获取所有模板
   async getTemplates(params?: PaginationParams & { search?: string }): Promise<Template[]> {
     const searchParams = new URLSearchParams();
-    
+
     if (params?.limit) searchParams.set('limit', params.limit.toString());
     if (params?.offset) searchParams.set('offset', params.offset.toString());
     if (params?.search) searchParams.set('search', params.search);
 
     const query = searchParams.toString();
     const endpoint = `/templates${query ? `?${query}` : ''}`;
-    
+
     const response = await this.request<Template[]>(endpoint);
     return response.data || [];
   }
@@ -83,7 +83,7 @@ export class TemplateApiClient {
       method: 'POST',
       body: JSON.stringify(template),
     });
-    
+
     if (!response.data) {
       throw new Error('Failed to create template');
     }
@@ -96,7 +96,7 @@ export class TemplateApiClient {
       method: 'PUT',
       body: JSON.stringify(updates),
     });
-    
+
     if (!response.data) {
       throw new Error('Failed to update template');
     }
@@ -116,7 +116,7 @@ export class TemplateApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    
+
     if (!response.data?.rendered_content) {
       throw new Error('Failed to render template');
     }
@@ -129,7 +129,7 @@ export class TemplateApiClient {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    
+
     if (!response.data?.rendered_content) {
       throw new Error('Failed to render template');
     }

@@ -21,6 +21,7 @@
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:client": "npm run dev --workspace=packages/client",
     "dev:docs": "npm run dev --workspace=packages/docs",
+    "preview:client": "npm run preview --workspace=packages/client",
     "start:server": "npm run start --workspace=packages/server",
     "start:client": "npm run start --workspace=packages/client",
     "clean": "rimraf packages/*/dist packages/*/node_modules/.cache",

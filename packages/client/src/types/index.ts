@@ -1,94 +1,109 @@
+// 模板相关类型
 export interface Template {
-  id: number;
-  name: string;
-  content: string;
-  data?: any;
-  created_at?: string;
-  updated_at?: string;
+  id?: number
+  name: string
+  content: string
+  data?: Record<string, any>
+  created_at?: string
+  updated_at?: string
 }
 
-export interface TemplateRender {
-  id: number;
-  template_id: number;
-  rendered_content: string;
-  render_data?: any;
-  rendered_at?: string;
+// 模板渲染结果
+export interface TemplateRenderResult {
+  rendered_content: string
+  template_id: number
+  render_data: Record<string, any>
 }
 
-export interface CreateTemplateRequest {
-  name: string;
-  content: string;
-  data?: any;
-}
-
-export interface UpdateTemplateRequest {
-  name?: string;
-  content?: string;
-  data?: any;
-}
-
-export interface RenderTemplateRequest {
-  [key: string]: any;
-}
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginationParams {
-  limit?: number;
-  offset?: number;
-}
-
+// 模板列表响应
 export interface TemplateListResponse {
-  templates: Template[];
-  pagination: {
-    limit: number | null;
-    offset: number | null;
-  };
+  success: boolean
+  data: Template[]
+  pagination?: {
+    limit: number | null
+    offset: number | null
+  }
 }
 
-export interface TemplateStats {
-  totalTemplates: number;
-  totalRenders: number;
-  recentRenders: number;
+// 模板详情响应
+export interface TemplateDetailResponse {
+  success: boolean
+  data: Template
 }
 
-export interface TemplateContextType {
-  templates: Template[];
-  loading: boolean;
-  error: string | null;
-  fetchTemplates: () => Promise<void>;
-  createTemplate: (template: CreateTemplateRequest) => Promise<Template>;
-  updateTemplate: (id: number, updates: UpdateTemplateRequest) => Promise<Template>;
-  deleteTemplate: (id: number) => Promise<void>;
-  renderTemplate: (id: number, data: RenderTemplateRequest) => Promise<string>;
+// 模板渲染响应
+export interface TemplateRenderResponse {
+  success: boolean
+  data: TemplateRenderResult
 }
 
+// API 错误响应
+export interface ApiError {
+  success: false
+  error: string
+  message?: string
+}
+
+// 模板表单数据
+export interface TemplateFormData {
+  name: string
+  content: string
+  data?: Record<string, any>
+}
+
+// 组件 Props 类型
 export interface TemplateRendererProps {
-  templateId?: number;
-  templateName?: string;
-  data?: RenderTemplateRequest;
-  onRender?: (result: string) => void;
-  onError?: (error: string) => void;
-  autoRender?: boolean;
-  className?: string;
+  template: Template
+  data?: Record<string, any>
+  onRender?: (result: TemplateRenderResult) => void
+  onError?: (error: string) => void
 }
 
 export interface TemplateEditorProps {
-  template?: Template;
-  onSave?: (template: Template) => void;
-  onCancel?: () => void;
-  className?: string;
+  template?: Template
+  onSave?: (template: Template) => void
+  onCancel?: () => void
+  loading?: boolean
 }
 
 export interface TemplateListProps {
-  onSelect?: (template: Template) => void;
-  onEdit?: (template: Template) => void;
-  onDelete?: (template: Template) => void;
-  className?: string;
-  showActions?: boolean;
+  templates?: Template[]
+  loading?: boolean
+  onEdit?: (template: Template) => void
+  onDelete?: (id: number) => void
+  onRender?: (template: Template) => void
+}
+
+export interface TemplateFormProps {
+  initialValues?: Partial<TemplateFormData>
+  onSubmit: (values: TemplateFormData) => void
+  onCancel?: () => void
+  loading?: boolean
+}
+
+// Hook 返回类型
+export interface UseTemplateResult {
+  template: Template | null
+  loading: boolean
+  error: string | null
+  fetchTemplate: (id: number) => Promise<void>
+  updateTemplate: (id: number, data: Partial<Template>) => Promise<void>
+  deleteTemplate: (id: number) => Promise<void>
+}
+
+export interface UseTemplateListResult {
+  templates: Template[]
+  loading: boolean
+  error: string | null
+  fetchTemplates: (params?: { limit?: number; offset?: number; search?: string }) => Promise<void>
+  createTemplate: (data: TemplateFormData) => Promise<void>
+  refreshTemplates: () => Promise<void>
+}
+
+export interface UseTemplateRendererResult {
+  renderResult: TemplateRenderResult | null
+  rendering: boolean
+  error: string | null
+  renderTemplate: (templateId: number, data?: Record<string, any>) => Promise<void>
+  renderByName: (name: string, data?: Record<string, any>) => Promise<void>
 } 
