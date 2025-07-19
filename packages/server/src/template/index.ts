@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Context, Next, Middleware } from 'koa';
 
-// 由于root-path-plugin没有类型定义，使用require
 const root = require('root-path-plugin');
 
 // 扩展RegExp原型，添加类型声明

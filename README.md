@@ -1,219 +1,302 @@
-# koa-html-template
+# Koa HTML Template Monorepo
 
-**🆕 v2.0 - 现已支持 TypeScript!**
+**🆕 v2.0 - 现已支持 TypeScript 和 Monorepo 架构!**
 
-这是一个基于 Koa 的模板引擎，可以渲染 HTML 文件进行数据渲染。现在完全支持 TypeScript，并升级到支持 Koa v2.14+。
+这是一个基于 Koa 的高性能模板引擎，采用现代化的 Monorepo 架构，完全支持 TypeScript，提供核心引擎、服务器应用、客户端组件和共享工具包。
 
-## 特性
-
-- ✅ **TypeScript 支持** - 完整的类型定义
-- ✅ **模板变量替换** `{{变量名}}`
-- ✅ **条件渲染** `{if条件}内容{/if}`
-- ✅ **循环渲染** `{for数组}内容{/for}`
-- ✅ **文件包含** `{-include文件路径}`
-- ✅ **Koa v2.14+ 兼容**
-
-## 安装
-
-```bash
-npm install koa-html-template
-```
-
-## TypeScript 使用
-
-```typescript
-import Koa from "koa";
-import koaHtmlTemplate, { ExtendedContext } from "koa-html-template";
-
-const app = new Koa();
-
-// 使用模板中间件 (默认模板目录: ./static)
-app.use(koaHtmlTemplate());
-
-// 或指定模板目录
-app.use(koaHtmlTemplate("./templates"));
-
-// 路由处理
-app.use(async (ctx: ExtendedContext) => {
-  const data = {
-    title: "Hello World",
-    message: "This is TypeScript!",
-    showExtra: true,
-    users: [
-      { name: "Alice", age: 25 },
-      { name: "Bob", age: 30 },
-    ],
-  };
-
-  ctx.template("index.html", data);
-});
-
-app.listen(3000);
-```
-
-## JavaScript (CommonJS) 使用
-
-```javascript
-const Koa = require("koa");
-const koaHtmlTemplate = require("koa-html-template");
-
-const app = new Koa();
-
-app.use(koaHtmlTemplate("./static"));
-
-app.use(async (ctx) => {
-  const data = {
-    title: "Hello World",
-    message: "Welcome!",
-  };
-
-  ctx.template("index.html", data);
-});
-
-app.listen(3000);
-```
-
-## 模板语法
-
-### 1. 变量替换
-
-```html
-<h1>{{title}}</h1>
-<p>{{message}}</p>
-```
-
-### 2. 条件渲染
-
-```html
-{if showExtra}
-<div>这是额外内容</div>
-{/if}
-```
-
-### 3. 循环渲染
-
-#### 数组循环
-
-```html
-{for users}
-<div>
-  <span>索引: {$index}</span>
-  <span>姓名: {$value.name}</span>
-  <span>年龄: {$value.age}</span>
-</div>
-{/for}
-```
-
-#### 对象循环
-
-```html
-{for config}
-<div>
-  <span>键: {$key}</span>
-  <span>值: {$value}</span>
-</div>
-{/for}
-```
-
-### 4. 文件包含
-
-```html
-{-include "header.html"}
-<main>主要内容</main>
-{-include "footer.html"}
-```
-
-## TypeScript 类型定义
-
-```typescript
-// 模板数据接口
-interface TemplateData {
-  [key: string]: any;
-}
-
-// 配置选项接口
-interface TemplateOptions {
-  // 保留用于未来扩展
-}
-
-// 扩展的 Context 接口
-interface ExtendedContext extends Context {
-  template(filePath: string, data: TemplateData): void;
-}
-```
-
-## API
-
-### koaHtmlTemplate(htmlPath?, options?)
-
-创建模板中间件。
-
-#### 参数
-
-- `htmlPath` (string, 可选): HTML 模板文件目录路径，默认为 `./static`
-- `options` (TemplateOptions, 可选): 配置选项（保留用于未来扩展）
-
-#### 返回值
-
-返回 Koa 中间件函数。
-
-## 目录结构示例
+## 🏗️ Monorepo 架构
 
 ```
-project/
-├── templates/
-│   ├── index.html
-│   ├── header.html
-│   └── footer.html
-├── src/
-│   └── app.ts
-└── package.json
+koa-html-template/
+├── packages/
+│   ├── core/          # 核心模板引擎
+│   ├── server/        # Koa 服务器应用
+│   ├── client/        # React 客户端组件库
+│   ├── shared/        # 共享类型和工具
+│   └── docs/          # 文档和示例
+├── README.md          # 项目主文档
+└── package.json       # Monorepo 根配置
 ```
 
-## 升级指南
+## 📦 包说明
 
-### 从 v1.x 升级到 v2.x
+### [@koa-html-template/core](./packages/core)
+核心模板引擎，提供模板解析、渲染和缓存功能。
 
-1. **安装 TypeScript 依赖** (如果使用 TypeScript):
+**特性：**
+- ✅ 完整的模板语法支持
+- ✅ 高性能缓存系统
+- ✅ TypeScript 类型定义
+- ✅ 错误处理和调试
 
-   ```bash
-   npm install -D typescript @types/koa @types/node
-   ```
+### [@koa-html-template/server](./packages/server)
+基于 Koa 的服务器应用，集成 PostgreSQL 数据库。
 
-2. **更新导入语句**:
+**特性：**
+- ✅ RESTful API
+- ✅ PostgreSQL 集成
+- ✅ 用户认证系统
+- ✅ 模板管理功能
 
-   ```typescript
-   // TypeScript
-   import koaHtmlTemplate, { ExtendedContext } from "koa-html-template";
+### [@koa-html-template/client](./packages/client)
+React 客户端组件库，提供模板渲染组件。
 
-   // JavaScript - 无需更改
-   const koaHtmlTemplate = require("koa-html-template");
-   ```
+**特性：**
+- ✅ React Hooks 支持
+- ✅ TypeScript 类型安全
+- ✅ 响应式设计
+- ✅ 组件测试覆盖
 
-3. **类型注解** (TypeScript):
-   ```typescript
-   app.use(async (ctx: ExtendedContext) => {
-     ctx.template("index.html", data);
-   });
-   ```
+### [@koa-html-template/shared](./packages/shared)
+共享类型定义、工具函数和常量。
 
-## 注意事项
+**特性：**
+- ✅ 统一的类型系统
+- ✅ 通用工具函数
+- ✅ API 响应结构
+- ✅ 错误代码定义
 
-- 确保模板文件存在于指定目录中
-- 模板文件路径是相对于指定的 HTML 目录
-- 条件渲染基于 JavaScript 真值判断
-- 循环渲染支持数组和普通对象
+### [@koa-html-template/docs](./packages/docs)
+基于 VitePress 的文档站点。
 
-## 兼容性
+**特性：**
+- ✅ 完整的使用指南
+- ✅ API 参考文档
+- ✅ 实用示例集合
+- ✅ 搜索功能
+
+## 🚀 快速开始
+
+### 环境要求
 
 - Node.js >= 14.0.0
-- Koa >= 2.14.0
-- TypeScript >= 5.0.0 (如果使用 TypeScript)
+- npm >= 7.0.0
+- TypeScript >= 5.0.0
 
-## 许可证
+### 安装
 
-ISC
+```bash
+# 克隆项目
+git clone https://github.com/dingxihu/koa-html-template.git
+cd koa-html-template
 
-## 贡献
+# 安装依赖
+npm install
 
-欢迎提交 Issue 和 Pull Request!
+# 构建所有包
+npm run build
+
+# 开发模式（同时启动服务器、客户端和文档）
+npm run dev
+```
+
+### 使用核心包
+
+```bash
+npm install @koa-html-template/core
+```
+
+```typescript
+import Koa from 'koa'
+import koaHtmlTemplate, { ExtendedContext } from '@koa-html-template/core'
+
+const app = new Koa()
+
+app.use(koaHtmlTemplate('./templates', {
+  cache: true,
+  debug: process.env.NODE_ENV !== 'production'
+}))
+
+app.use(async (ctx: ExtendedContext) => {
+  ctx.template('index.html', {
+    title: '欢迎使用 Koa HTML Template',
+    users: [
+      { name: '张三', age: 25 },
+      { name: '李四', age: 30 }
+    ]
+  })
+})
+
+app.listen(3000)
+```
+
+## 🛠️ 开发指南
+
+### 开发脚本
+
+```bash
+# 构建所有包
+npm run build
+
+# 分别构建各个包
+npm run build:core
+npm run build:shared
+npm run build:server
+npm run build:client
+
+# 运行测试
+npm run test
+
+# 代码检查
+npm run lint
+npm run lint:fix
+
+# 清理构建文件
+npm run clean
+```
+
+### 开发模式
+
+```bash
+# 同时启动服务器、客户端和文档
+npm run dev
+
+# 单独启动
+npm run dev:server    # 启动服务器（端口 3000）
+npm run dev:client    # 启动客户端开发服务器
+npm run dev:docs      # 启动文档站点（端口 5173）
+```
+
+### 添加新包
+
+1. 在 `packages/` 目录下创建新包
+2. 添加 `package.json` 和 `tsconfig.json`
+3. 在根 `tsconfig.json` 中添加引用
+4. 更新相关依赖关系
+
+## 🧪 测试
+
+每个包都包含完整的测试套件：
+
+```bash
+# 运行所有测试
+npm run test
+
+# 运行特定包的测试
+npm run test --workspace=packages/core
+npm run test --workspace=packages/server
+
+# 监听模式
+npm run test:watch
+
+# 测试覆盖率
+npm run test:coverage
+```
+
+## 📚 文档
+
+- **在线文档**: [https://dingxihu.github.io/koa-html-template](https://dingxihu.github.io/koa-html-template)
+- **API 参考**: [API 文档](./packages/docs/api/)
+- **使用指南**: [指南文档](./packages/docs/guide/)
+- **示例集合**: [示例代码](./packages/docs/examples/)
+
+### 本地运行文档
+
+```bash
+npm run dev:docs
+```
+
+访问 http://localhost:5173 查看文档。
+
+## 🚀 部署
+
+### 生产构建
+
+```bash
+# 构建所有包
+npm run build
+
+# 启动生产服务器
+npm run start:server
+```
+
+### Docker 部署
+
+```bash
+# 构建镜像
+docker build -t koa-html-template .
+
+# 运行容器
+docker run -p 3000:3000 koa-html-template
+```
+
+## 📈 性能
+
+- **模板缓存**: 自动缓存编译后的模板，显著提升性能
+- **增量构建**: Monorepo 支持包级别的增量构建
+- **Tree Shaking**: 支持树摇优化，减少打包体积
+- **类型优化**: TypeScript 类型系统提供编译时优化
+
+## 🔄 版本管理
+
+项目使用 [Changesets](https://github.com/changesets/changesets) 进行版本管理：
+
+```bash
+# 添加变更集
+npm run changeset
+
+# 版本更新
+npm run version-packages
+
+# 发布包
+npm run release
+```
+
+## 🛡️ 安全性
+
+- **XSS 防护**: 自动转义 HTML 内容
+- **依赖扫描**: 定期扫描安全漏洞
+- **类型安全**: TypeScript 提供编译时类型检查
+- **输入验证**: 严格的输入验证和错误处理
+
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！
+
+### 开发流程
+
+1. Fork 项目
+2. 创建特性分支: `git checkout -b feature/amazing-feature`
+3. 提交更改: `git commit -m 'Add amazing feature'`
+4. 推送分支: `git push origin feature/amazing-feature`
+5. 开启 Pull Request
+
+### 提交规范
+
+我们使用 [Conventional Commits](https://conventionalcommits.org/) 规范：
+
+```
+feat: 添加新功能
+fix: 修复bug
+docs: 更新文档
+style: 代码格式调整
+refactor: 代码重构
+test: 添加或修改测试
+chore: 构建过程或辅助工具的变动
+```
+
+### 代码质量
+
+- 所有代码必须通过 ESLint 检查
+- 新功能需要添加对应的测试用例
+- 保持测试覆盖率在 80% 以上
+- 使用 Prettier 格式化代码
+
+## 📄 许可证
+
+[ISC License](LICENSE) © 2024 Jericho
+
+## 🔗 相关链接
+
+- [GitHub Issues](https://github.com/dingxihu/koa-html-template/issues)
+- [GitHub Discussions](https://github.com/dingxihu/koa-html-template/discussions)
+- [更新日志](CHANGELOG.md)
+- [贡献指南](CONTRIBUTING.md)
+
+## ⭐ 支持项目
+
+如果这个项目对你有帮助，请考虑给我们一个星标 ⭐
+
+---
+
+**Happy Coding! 🎉**

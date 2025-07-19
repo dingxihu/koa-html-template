@@ -1,0 +1,23 @@
+{
+  "name": "@koa-html-template/docs",
+  "version": "2.0.0",
+  "description": "Documentation and examples for koa-html-template",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "serve": "vitepress serve"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0-rc.20",
+    "vue": "^3.3.4"
+  },
+  "keywords": [
+    "documentation",
+    "examples",
+    "vitepress"
+  ],
+  "author": "Jericho",
+  "license": "ISC"
+} 

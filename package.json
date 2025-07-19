@@ -1,25 +1,44 @@
 {
-  "name": "koa-html-template",
+  "name": "koa-html-template-monorepo",
   "version": "2.0.0",
-  "description": "This is a koa-based templating engine that can render html files for data rendering.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
+  "description": "Koa HTML template engine with TypeScript support - Monorepo with core, server, client, shared packages and documentation",
+  "private": true,
+  "workspaces": [
+    "packages/*"
   ],
-  "dependencies": {
-    "root-path-plugin": "^1.0.0",
-    "koa": "^2.14.2"
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:core": "npm run build --workspace=packages/core",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build:server": "npm run build --workspace=packages/server",
+    "build:client": "npm run build --workspace=packages/client",
+    "test": "npm run test --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run dev:docs\"",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "dev:client": "npm run dev --workspace=packages/client",
+    "dev:docs": "npm run dev --workspace=packages/docs",
+    "start:server": "npm run start --workspace=packages/server",
+    "start:client": "npm run start --workspace=packages/client",
+    "clean": "rimraf packages/*/dist packages/*/node_modules/.cache",
+    "clean:all": "rimraf node_modules packages/*/node_modules packages/*/dist",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "devDependencies": {
-    "@types/koa": "^2.13.12",
+    "@changesets/cli": "^2.26.2",
     "@types/node": "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^8.2.1",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
     "typescript": "^5.0.0"
-  },
-  "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -27,11 +46,18 @@
   },
   "keywords": [
     "koa-html-template",
-    "koa-html",
     "typescript",
-    "template-engine"
+    "template-engine",
+    "monorepo",
+    "koa",
+    "react",
+    "postgresql"
   ],
   "author": "Jericho",
   "license": "ISC",
-  "homepage": "https://github.com/dingxihu/koa-html-template#readme"
+  "homepage": "https://github.com/dingxihu/koa-html-template#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=7.0.0"
+  }
 }
