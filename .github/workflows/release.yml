@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # 发布 npm 包
+  release:
+    runs-on: ubuntu-latest
+    name: Release Packages
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build all packages
+      run: npm run build
+    
+    - name: Run tests
+      run: npm run test
+    
+    - name: Create Release Pull Request or Publish
+      uses: changesets/action@v1
+      with:
+        publish: npm run release
+        commit: 'chore: release packages'
+        title: 'chore: release packages'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # 创建 GitHub Release
+  create-release:
+    runs-on: ubuntu-latest
+    name: Create GitHub Release
+    needs: release
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build all packages
+      run: npm run build
+    
+    - name: Generate changelog
+      run: npm run changelog
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## 🚀 New Release
+          
+          ### Changes
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ### Packages Updated
+          - @koa-html-template/core
+          - @koa-html-template/server
+          - @koa-html-template/client
+          - @koa-html-template/shared
+          
+          ### Installation
+          ```bash
+          npm install @koa-html-template/core
+          npm install @koa-html-template/server
+          npm install @koa-html-template/client
+          npm install @koa-html-template/shared
+          ```
+        draft: false
+        prerelease: false 

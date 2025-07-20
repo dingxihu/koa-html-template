@@ -1,0 +1,258 @@
+name: Nightly
+
+on:
+  schedule:
+    # 每天凌晨 2 点运行
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  # 依赖更新检查
+  dependency-update:
+    runs-on: ubuntu-latest
+    name: Dependency Update Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check for outdated dependencies
+      run: npm outdated
+    
+    - name: Create dependency update issue
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: issues } = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: ['dependencies']
+          });
+          
+          const hasDependencyIssue = issues.some(issue => 
+            issue.title.includes('Dependency Update')
+          );
+          
+          if (!hasDependencyIssue) {
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Dependency Update Required',
+              body: `## 🔄 Dependency Update Check
+              
+              The nightly dependency check has detected outdated packages.
+              
+              ### Action Required
+              - [ ] Review outdated dependencies
+              - [ ] Update packages safely
+              - [ ] Test after updates
+              - [ ] Update lock files
+              
+              ### Next Steps
+              1. Run \`npm outdated\` to see details
+              2. Update packages with \`npm update\`
+              3. Test thoroughly
+              4. Create PR with updates
+              
+              ---
+              *This issue was automatically created by the nightly workflow.*`,
+              labels: ['dependencies', 'maintenance']
+            });
+          }
+
+  # 安全漏洞扫描
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Vulnerability Scan
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run npm audit
+      run: npm audit --audit-level=moderate
+    
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high --json-file-output=snyk-report.json
+    
+    - name: Upload Snyk results
+      uses: actions/upload-artifact@v4
+      with:
+        name: snyk-security-report
+        path: snyk-report.json
+
+  # 性能基准测试
+  performance-benchmark:
+    runs-on: ubuntu-latest
+    name: Performance Benchmark
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build packages
+      run: npm run build
+    
+    - name: Run performance tests
+      run: npm run test:performance
+    
+    - name: Generate performance report
+      run: |
+        echo "## Performance Benchmark Results" > performance-report.md
+        echo "" >> performance-report.md
+        echo "### Build Times" >> performance-report.md
+        echo "- Core package: $(date)" >> performance-report.md
+        echo "- Client package: $(date)" >> performance-report.md
+        echo "- Server package: $(date)" >> performance-report.md
+        echo "" >> performance-report.md
+        echo "### Bundle Sizes" >> performance-report.md
+        echo "- Core: $(du -sh packages/core/dist | cut -f1)" >> performance-report.md
+        echo "- Client: $(du -sh packages/client/dist | cut -f1)" >> performance-report.md
+        echo "- Server: $(du -sh packages/server/dist | cut -f1)" >> performance-report.md
+    
+    - name: Upload performance report
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-report
+        path: performance-report.md
+
+  # 文档完整性检查
+  docs-check:
+    runs-on: ubuntu-latest
+    name: Documentation Completeness Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check README files
+      run: |
+        # 检查所有包是否有 README
+        for pkg in core shared server client docs; do
+          if [ ! -f "packages/$pkg/README.md" ]; then
+            echo "Missing README.md in packages/$pkg"
+            exit 1
+          fi
+        done
+    
+    - name: Check API documentation
+      run: |
+        # 检查 TypeScript 类型定义
+        npm run type-check
+    
+    - name: Build documentation
+      run: npm run build --workspace=packages/docs
+    
+    - name: Check documentation build
+      run: |
+        if [ ! -d "packages/docs/dist" ]; then
+          echo "Documentation build failed"
+          exit 1
+        fi
+
+  # 数据库迁移检查
+  migration-check:
+    runs-on: ubuntu-latest
+    name: Database Migration Check
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: koa_template_nightly
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Setup database
+      run: |
+        cd packages/server
+        npm run db:setup
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: koa_template_nightly
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+    
+    - name: Run migrations
+      run: |
+        cd packages/server
+        npm run db:migrate
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: koa_template_nightly
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+    
+    - name: Test database operations
+      run: |
+        cd packages/server
+        npm run test
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: koa_template_nightly
+        DB_USER: postgres
+        DB_PASSWORD: postgres 

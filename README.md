@@ -146,7 +146,7 @@ app.use(koaHtmlTemplate('./templates', {
 app.use(async (ctx: any) => {
   ctx.template('index.html', {
     title: '欢迎使用 Koa HTML Template',
-    users: [
+      users: [
       { name: '张三', age: 25 },
       { name: '李四', age: 30 }
     ]
@@ -528,7 +528,7 @@ npm run storybook
 
 ### 生产构建
 
-```bash
+   ```bash
 # 构建所有包
 npm run build
 
@@ -592,6 +592,59 @@ VITE_API_URL=http://localhost:3000
 - **渲染统计**: 记录模板渲染性能数据
 - **客户端预览**: 支持客户端实时模板预览
 - **响应式设计**: 适配各种屏幕尺寸
+
+## 🚀 CI/CD 和自动化
+
+项目使用 GitHub Actions 进行完整的自动化流程管理：
+
+### 持续集成 (CI)
+- ✅ **多包并行测试**: 核心、共享、服务器、客户端包独立测试
+- ✅ **数据库集成测试**: PostgreSQL 服务容器化测试
+- ✅ **代码质量检查**: ESLint、TypeScript、Prettier 检查
+- ✅ **安全扫描**: npm audit、Snyk 安全漏洞扫描
+- ✅ **测试覆盖率**: 自动上传到 Codecov，阈值 80%
+- ✅ **包大小监控**: 自动检查构建产物大小
+
+### 持续部署 (CD)
+- ✅ **文档自动部署**: VitePress 文档自动部署到 GitHub Pages
+- ✅ **Storybook 部署**: 组件文档自动部署到 GitHub Pages
+- ✅ **Docker 镜像构建**: 自动构建和推送 Docker 镜像
+- ✅ **npm 包发布**: 自动发布到 npm 注册表
+
+### 质量保证
+- ✅ **PR 检查**: 代码质量、覆盖率、安全性、构建检查
+- ✅ **提交规范**: Conventional Commits 格式检查
+- ✅ **依赖更新**: Dependabot 自动依赖更新
+- ✅ **夜间构建**: 定期性能基准和文档完整性检查
+
+### 工作流状态
+[![CI/CD](https://github.com/dingxihu/koa-html-template/workflows/CI%2FCD/badge.svg)](https://github.com/dingxihu/koa-html-template/actions/workflows/ci.yml)
+[![Deploy](https://github.com/dingxihu/koa-html-template/workflows/Deploy/badge.svg)](https://github.com/dingxihu/koa-html-template/actions/workflows/deploy.yml)
+[![Release](https://github.com/dingxihu/koa-html-template/workflows/Release/badge.svg)](https://github.com/dingxihu/koa-html-template/actions/workflows/release.yml)
+
+### 自动化流程
+```bash
+# 开发流程
+git checkout -b feature/new-feature
+# 开发代码...
+git commit -m "feat: add new feature"
+git push origin feature/new-feature
+# 创建 PR → 自动运行检查 → 代码审查 → 合并
+
+# 发布流程
+git checkout main
+git merge develop
+git push origin main
+# 自动运行 CI/CD → 发布 npm 包 → 部署文档 → 创建 Release
+```
+
+### 环境要求
+- **Node.js**: 18.x
+- **PostgreSQL**: 15.x (测试环境)
+- **Docker**: 用于容器化部署
+- **GitHub Secrets**: NPM_TOKEN, DOCKER_PASSWORD, SNYK_TOKEN
+
+详细配置请查看 [GitHub Actions 文档](.github/README.md)。
 
 ## 🔄 版本管理
 

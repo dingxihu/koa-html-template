@@ -1,0 +1,191 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  # 代码质量检查
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Lint all packages
+      run: npm run lint
+    
+    - name: Check TypeScript
+      run: npm run type-check
+    
+    - name: Check formatting
+      run: npm run format:check
+    
+    - name: Check for TODO comments
+      run: |
+        if grep -r "TODO\|FIXME\|HACK" src/ packages/ --exclude-dir=node_modules; then
+          echo "Found TODO/FIXME/HACK comments. Please address them before merging."
+          exit 1
+        fi
+
+  # 测试覆盖率检查
+  coverage-check:
+    runs-on: ubuntu-latest
+    name: Coverage Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run tests with coverage
+      run: npm run test:coverage
+    
+    - name: Check coverage threshold
+      run: |
+        # 检查覆盖率是否达到 80%
+        COVERAGE=$(npm run test:coverage -- --coverageReporters=text --coverageReporters=lcov | grep -o "All files[^%]*" | grep -o "[0-9]*\.[0-9]*")
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Test coverage is below 80%: $COVERAGE%"
+          exit 1
+        fi
+        echo "Test coverage: $COVERAGE%"
+
+  # 依赖安全检查
+  security-check:
+    runs-on: ubuntu-latest
+    name: Security Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+    
+    - name: Check for outdated dependencies
+      run: npm outdated || true
+
+  # 构建检查
+  build-check:
+    runs-on: ubuntu-latest
+    name: Build Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build all packages
+      run: npm run build
+    
+    - name: Check build artifacts
+      run: |
+        # 检查构建产物是否存在
+        for pkg in core shared server client; do
+          if [ ! -d "packages/$pkg/dist" ]; then
+            echo "Build artifacts missing for $pkg package"
+            exit 1
+          fi
+        done
+
+  # 包大小检查
+  bundle-size:
+    runs-on: ubuntu-latest
+    name: Bundle Size Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build packages
+      run: npm run build
+    
+    - name: Check bundle sizes
+      run: |
+        # 检查客户端包大小
+        CLIENT_SIZE=$(du -s packages/client/dist | cut -f1)
+        if [ "$CLIENT_SIZE" -gt 5000 ]; then
+          echo "Client bundle size is too large: ${CLIENT_SIZE}KB"
+          exit 1
+        fi
+        
+        # 检查核心包大小
+        CORE_SIZE=$(du -s packages/core/dist | cut -f1)
+        if [ "$CORE_SIZE" -gt 1000 ]; then
+          echo "Core bundle size is too large: ${CORE_SIZE}KB"
+          exit 1
+        fi
+        
+        echo "Bundle sizes are within limits"
+        echo "Client: ${CLIENT_SIZE}KB"
+        echo "Core: ${CORE_SIZE}KB"
+
+  # 提交信息检查
+  commit-message:
+    runs-on: ubuntu-latest
+    name: Commit Message Check
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check commit messages
+      run: |
+        # 检查最近的提交信息格式
+        git log --oneline -10 | while read commit; do
+          if ! echo "$commit" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+"; then
+            echo "Invalid commit message format: $commit"
+            echo "Expected format: type(scope): description"
+            exit 1
+          fi
+        done 

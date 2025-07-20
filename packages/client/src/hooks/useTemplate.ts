@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react'
 import { templateApi } from '../services/templateApi'
-import type { 
-  Template, 
-  UseTemplateResult, 
+import type {
+  Template,
+  UseTemplateResult,
   UpdateTemplateRequest,
-  TemplateRenderResult 
+  TemplateRenderResult
 } from '../types'
 
 export function useTemplate(): UseTemplateResult {
@@ -15,9 +15,11 @@ export function useTemplate(): UseTemplateResult {
   const fetchTemplate = useCallback(async (id: number) => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const response = await templateApi.getTemplate(id)
+      console.log(222, response);
+
       if (response.success && response.data) {
         setTemplate(response.data)
       } else {
@@ -35,7 +37,7 @@ export function useTemplate(): UseTemplateResult {
   const updateTemplate = useCallback(async (id: number, data: UpdateTemplateRequest) => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const response = await templateApi.updateTemplate(id, data)
       if (response.success && response.data) {
@@ -55,7 +57,7 @@ export function useTemplate(): UseTemplateResult {
   const deleteTemplate = useCallback(async (id: number) => {
     setLoading(true)
     setError(null)
-    
+
     try {
       const response = await templateApi.deleteTemplate(id)
       if (response.success) {
