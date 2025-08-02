@@ -45,8 +45,7 @@ var require_rfdc = __commonJS({
     }
     function rfdc2(opts) {
       opts = opts || {};
-      if (opts.circles)
-        return rfdcCircles(opts);
+      if (opts.circles) return rfdcCircles(opts);
       const constructorHandlers = /* @__PURE__ */ new Map();
       constructorHandlers.set(Date, (o) => new Date(o));
       constructorHandlers.set(Map, (o, fn) => new Map(cloneArray(Array.from(o), fn)));
@@ -77,17 +76,14 @@ var require_rfdc = __commonJS({
         return a2;
       }
       function clone(o) {
-        if (typeof o !== "object" || o === null)
-          return o;
-        if (Array.isArray(o))
-          return cloneArray(o, clone);
+        if (typeof o !== "object" || o === null) return o;
+        if (Array.isArray(o)) return cloneArray(o, clone);
         if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
           return handler(o, clone);
         }
         const o2 = {};
         for (const k in o) {
-          if (Object.hasOwnProperty.call(o, k) === false)
-            continue;
+          if (Object.hasOwnProperty.call(o, k) === false) continue;
           const cur = o[k];
           if (typeof cur !== "object" || cur === null) {
             o2[k] = cur;
@@ -102,10 +98,8 @@ var require_rfdc = __commonJS({
         return o2;
       }
       function cloneProto(o) {
-        if (typeof o !== "object" || o === null)
-          return o;
-        if (Array.isArray(o))
-          return cloneArray(o, cloneProto);
+        if (typeof o !== "object" || o === null) return o;
+        if (Array.isArray(o)) return cloneArray(o, cloneProto);
         if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
           return handler(o, cloneProto);
         }
@@ -163,10 +157,8 @@ var require_rfdc = __commonJS({
         return a2;
       }
       function clone(o) {
-        if (typeof o !== "object" || o === null)
-          return o;
-        if (Array.isArray(o))
-          return cloneArray(o, clone);
+        if (typeof o !== "object" || o === null) return o;
+        if (Array.isArray(o)) return cloneArray(o, clone);
         if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
           return handler(o, clone);
         }
@@ -174,8 +166,7 @@ var require_rfdc = __commonJS({
         refs.push(o);
         refsNew.push(o2);
         for (const k in o) {
-          if (Object.hasOwnProperty.call(o, k) === false)
-            continue;
+          if (Object.hasOwnProperty.call(o, k) === false) continue;
           const cur = o[k];
           if (typeof cur !== "object" || cur === null) {
             o2[k] = cur;
@@ -197,10 +188,8 @@ var require_rfdc = __commonJS({
         return o2;
       }
       function cloneProto(o) {
-        if (typeof o !== "object" || o === null)
-          return o;
-        if (Array.isArray(o))
-          return cloneArray(o, cloneProto);
+        if (typeof o !== "object" || o === null) return o;
+        if (Array.isArray(o)) return cloneArray(o, cloneProto);
         if (o.constructor !== Object && (handler = constructorHandlers.get(o.constructor))) {
           return handler(o, cloneProto);
         }
@@ -2557,8 +2546,7 @@ var StateEditor = class {
         object = object.get(section);
       else if (object instanceof Set)
         object = Array.from(object.values())[section];
-      else
-        object = object[section];
+      else object = object[section];
       if (this.refEditor.isRef(object))
         object = this.refEditor.get(object);
     }
@@ -2611,8 +2599,7 @@ var StateEditor = class {
           object.delete(field);
         else if (toRaw(object) instanceof Set)
           object.delete(Array.from(object.values())[field]);
-        else
-          Reflect.deleteProperty(object, field);
+        else Reflect.deleteProperty(object, field);
       }
       if (!state.remove) {
         const target22 = object[state.newKey || field];

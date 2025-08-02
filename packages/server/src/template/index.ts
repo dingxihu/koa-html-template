@@ -120,9 +120,4 @@ export default function koaHtmlTemplate(
 }
 
 // 也导出为命名导出，保持向后兼容
-export { koaHtmlTemplate };
-
-// CommonJS导出支持
-module.exports = koaHtmlTemplate;
-module.exports.default = koaHtmlTemplate;
-module.exports.koaHtmlTemplate = koaHtmlTemplate; 
+export { koaHtmlTemplate }; 
