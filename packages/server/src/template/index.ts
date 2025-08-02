@@ -12,7 +12,7 @@ declare global {
 }
 
 if (!RegExp.prototype.check) {
-  RegExp.prototype.check = function(o: any): boolean {
+  RegExp.prototype.check = function (o: any): boolean {
     return this.test(o) || this.test(o);
   };
 }
@@ -44,9 +44,9 @@ export default function koaHtmlTemplate(
 
   return async function template(ctx: Context, next: Next): Promise<void> {
     // 扩展ctx对象，添加template方法
-    (ctx as ExtendedContext).template = function(filePath: string, data: TemplateData): void {
+    (ctx as ExtendedContext).template = function (filePath: string, data: TemplateData): void {
       const temp = fs.readFileSync(path.join(htmlpath, filePath)).toString();
-      
+
       // 将所有 {{key}} 替换成相应的数据
       this.body = temp
         .replace(/{-include([^{}]+)}/g, (match: string, key: string): string => {
@@ -69,7 +69,7 @@ export default function koaHtmlTemplate(
           // for循环
           const obj = data[key1.trim()];
           let s = '';
-          
+
           if (Object.prototype.toString.call(obj) === '[object Object]') {
             // 说明obj是一个对象
             for (const o in obj) {
@@ -85,7 +85,7 @@ export default function koaHtmlTemplate(
             }
             return s;
           }
-          
+
           if (Array.isArray(obj)) {
             // 说明obj是一个数组
             for (let i = 0, len = obj.length; i < len; i++) {
@@ -110,14 +110,13 @@ export default function koaHtmlTemplate(
             }
             return s;
           }
-          
+
           return '';
         });
     };
-    
+
     await next();
   };
 }
 
-// 也导出为命名导出，保持向后兼容
 export { koaHtmlTemplate }; 

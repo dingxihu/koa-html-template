@@ -41,8 +41,8 @@ app.on('error', (err, ctx) => {
 async function startServer() {
   try {
     // 运行数据库迁移
-    console.log('运行数据库迁移...');
-    await runMigrations();
+    // console.log('运行数据库迁移...');
+    // await runMigrations();
 
     app.listen(PORT, () => {
       console.log(`🚀 服务器启动成功！`);

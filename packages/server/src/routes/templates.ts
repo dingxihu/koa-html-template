@@ -8,6 +8,8 @@ const router = new Router({ prefix: '/api/templates' });
 router.get('/', async (ctx: Context) => {
   try {
     const { limit, offset, search } = ctx.query;
+    console.log(222, limit, offset, search);
+
     let templates;
 
     if (search) {
@@ -209,7 +211,7 @@ function renderTemplate(template: string, data: any): string {
     .replace(/{for([^{}]+)}([^{}]+){\/for}/g, (match: string, key1: string, key2: string): string => {
       const obj = data[key1.trim()];
       let s = '';
-      
+
       if (Object.prototype.toString.call(obj) === '[object Object]') {
         for (const o in obj) {
           s += key2.trim().replace(/{\$([^{}]+)}/g, (match: string, key: string): string => {
@@ -224,7 +226,7 @@ function renderTemplate(template: string, data: any): string {
         }
         return s;
       }
-      
+
       if (Array.isArray(obj)) {
         for (let i = 0, len = obj.length; i < len; i++) {
           s += key2.trim().replace(/{\$([^{}]+)}/g, (match: string, key: string): string => {
@@ -247,7 +249,7 @@ function renderTemplate(template: string, data: any): string {
         }
         return s;
       }
-      
+
       return '';
     });
 }
